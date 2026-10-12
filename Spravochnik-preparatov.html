@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1f8a5b">
+<title>Справочник препаратов</title>
+<style>
+:root{
+  --green:#1f8a5b; --green-d:#146642; --green-l:#e4f4ec;
+  --blue:#1f6fb8; --blue-d:#154f87; --blue-l:#e3effa;
+  --red:#c8363b; --red-d:#9a2226; --red-l:#fde8e8;
+  --bg:#f4f7f6; --card:#fff; --text:#15221c; --muted:#5b6b64; --line:#dbe4e0;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text);font:16px/1.45 -apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+#app{max-width:720px;margin:0 auto;min-height:100vh;padding-bottom:84px}
+header.top{position:sticky;top:0;z-index:5;color:#fff;padding:calc(env(safe-area-inset-top) + 12px) 16px 12px;display:flex;align-items:center;gap:10px;background:linear-gradient(90deg,var(--green),var(--blue))}
+header.top h1{font-size:19px;margin:0;font-weight:700;flex:1}
+header.top button{background:rgba(255,255,255,.2);border:0;color:#fff;border-radius:10px;font-size:20px;width:38px;height:38px}
+main{padding:14px 16px}
+h2{font-size:20px;margin:6px 0 10px}
+h3{font-size:16px;margin:16px 0 6px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.drug{display:flex;gap:12px;align-items:center;cursor:pointer;border-left:6px solid var(--c)}
+.drug .art{width:84px;height:84px;flex:none;border-radius:14px;background:var(--cl);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.drug .art img,.hero .art img{width:100%;height:100%;object-fit:cover}
+.drug h3{margin:0;color:var(--cd);font-size:18px}
+.drug p{margin:2px 0 0;color:var(--muted);font-size:14px}
+.hero{display:flex;gap:14px;align-items:center;background:var(--cl);border:1px solid var(--c);border-radius:18px;padding:14px;margin-bottom:12px}
+.hero .art{width:110px;height:110px;flex:none;border-radius:16px;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.hero h2{margin:0;color:var(--cd)} .hero p{margin:4px 0 0;color:var(--muted);font-size:14px}
+.btn{display:block;width:100%;border:0;border-radius:14px;padding:14px;font-size:16px;font-weight:600;color:#fff;background:var(--c,var(--green));margin:8px 0;text-align:center;text-decoration:none}
+.btn.alt{background:#fff;color:var(--cd,var(--green-d));border:2px solid var(--c,var(--green))}
+.btn.red{background:var(--red)} .btn.blue{background:var(--blue)} .btn.small{display:inline-block;width:auto;padding:8px 14px;font-size:14px;margin:4px 6px 4px 0}
+.tabs{display:flex;gap:6px;overflow-x:auto;margin:0 -16px 12px;padding:0 16px}
+.tabs button{flex:none;border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-size:14px;color:var(--text)}
+.tabs button.on{background:var(--c);border-color:var(--c);color:#fff}
+.warn{background:var(--red-l);border:1px solid var(--red);color:var(--red-d);border-radius:14px;padding:12px;margin:10px 0;font-size:14px}
+.info{background:var(--blue-l);border:1px solid var(--blue);color:var(--blue-d);border-radius:14px;padding:12px;margin:10px 0;font-size:14px}
+.ok{background:var(--green-l);border:1px solid var(--green);color:var(--green-d);border-radius:14px;padding:12px;margin:10px 0;font-size:14px}
+label{display:block;font-weight:600;font-size:14px;margin:12px 0 4px}
+input,select,textarea{width:100%;padding:12px;border:1px solid var(--line);border-radius:12px;font:inherit;background:#fff;color:var(--text)}
+textarea{min-height:96px}
+.row{display:flex;gap:10px}.row>*{flex:1}
+ul.clean{padding-left:20px;margin:6px 0}ul.clean li{margin:4px 0}
+details{border:1px solid var(--line);border-radius:14px;background:#fff;margin-bottom:8px;overflow:hidden}
+summary{padding:13px 14px;font-weight:600;cursor:pointer;color:var(--cd,var(--green-d))}
+details .in{padding:0 14px 12px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td,th{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600}
+.big{font-size:34px;font-weight:800;color:var(--cd,var(--green-d));line-height:1.1}
+.pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700}
+.pill.g{background:var(--green-l);color:var(--green-d)}.pill.r{background:var(--red-l);color:var(--red-d)}.pill.b{background:var(--blue-l);color:var(--blue-d)}
+nav.bar{position:fixed;left:0;right:0;bottom:0;z-index:6;background:#fff;border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom)}
+nav.bar a{flex:1;text-align:center;padding:8px 2px 7px;font-size:11px;color:var(--muted);text-decoration:none}
+nav.bar a b{display:block;font-size:21px;line-height:1.2}
+nav.bar a.on{color:var(--green-d);font-weight:700}
+.rem{display:flex;align-items:center;gap:10px}
+.rem .t{font-size:26px;font-weight:800;color:var(--blue-d);min-width:84px}
+.rem .d{flex:1;font-size:14px}.rem .d small{color:var(--muted);display:block}
+.sw{width:50px;height:30px;border-radius:99px;background:#c9d3ce;border:0;position:relative;flex:none}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:.2s}
+.sw.on{background:var(--green)}.sw.on::after{left:23px}
+.x{background:none;border:0;color:var(--red);font-size:20px}
+.alarm{position:fixed;inset:0;background:rgba(10,20,15,.6);z-index:20;display:flex;align-items:center;justify-content:center;padding:20px}
+.alarm .box{background:#fff;border-radius:22px;padding:22px;max-width:380px;width:100%;text-align:center;border-top:8px solid var(--blue)}
+.alarm .e{font-size:54px}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:#15221c;color:#fff;border-radius:12px;padding:10px 16px;z-index:30;font-size:14px;max-width:90%}
+.disc{font-size:12px;color:var(--muted);text-align:center;margin:18px 4px}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top"><button id="back" aria-label="Назад" style="display:none">‹</button><h1 id="title">Справочник препаратов</h1></header>
+  <main id="view"></main>
+  <nav class="bar">
+    <a href="#/" data-r="home"><b>💊</b>Препараты</a>
+    <a href="#/calc" data-r="calc"><b>🧮</b>Калькулятор</a>
+    <a href="#/remind" data-r="remind"><b>⏰</b>Напоминания</a>
+    <a href="#/pharmacy" data-r="pharmacy"><b>📍</b>Аптеки</a>
+    <a href="#/ae" data-r="ae"><b>⚠️</b>Сообщить о НЯ</a>
+  </nav>
+</div>
+
+<script>
+/* ============ вспомогательное ============ */
+const $ = (s, el=document) => el.querySelector(s);
+const $$ = (s, el=document) => [...el.querySelectorAll(s)];
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+function toast(msg){ const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2800); }
+const cap = window.Capacitor, LN = cap && cap.Plugins && cap.Plugins.LocalNotifications;
+const isNative = !!(cap && cap.isNativePlatform && cap.isNativePlatform());
+
+/* ============ иллюстрации (если нет фото в img/) ============ */
+const ART = {
+  acne: `<svg viewBox="0 0 100 100" width="100%" height="100%"><rect x="12" y="26" width="76" height="48" rx="8" fill="#fff" stroke="#c8363b" stroke-width="3"/><g transform="rotate(-25 50 50)"><rect x="22" y="40" width="30" height="16" rx="8" fill="#c8363b"/><rect x="48" y="40" width="30" height="16" rx="8" fill="#fff" stroke="#c8363b" stroke-width="3"/></g><circle cx="26" cy="68" r="4" fill="#c8363b" opacity=".35"/><circle cx="74" cy="32" r="4" fill="#c8363b" opacity=".35"/></svg>`,
+  aqua: `<svg viewBox="0 0 100 100" width="100%" height="100%"><rect x="34" y="34" width="32" height="56" rx="8" fill="#fff" stroke="#1f6fb8" stroke-width="3"/><rect x="34" y="52" width="32" height="26" fill="#bfdcf5"/><rect x="40" y="18" width="20" height="16" rx="3" fill="#1f6fb8"/><rect x="44" y="8" width="12" height="10" rx="2" fill="#154f87"/><path d="M62 12 l14 -4 M64 18 l16 0 M62 24 l14 4" stroke="#1f6fb8" stroke-width="3" stroke-linecap="round"/><path d="M50 60 q-6 -8 0 -14 q6 6 0 14z" fill="#1f6fb8"/></svg>`,
+  optinol: `<svg viewBox="0 0 100 100" width="100%" height="100%"><path d="M38 38h24v10l6 8v30a6 6 0 0 1-6 6H38a6 6 0 0 1-6-6V56l6-8z" fill="#fff" stroke="#1f8a5b" stroke-width="3"/><rect x="38" y="62" width="24" height="24" rx="3" fill="#cdeedd"/><rect x="42" y="18" width="16" height="20" rx="3" fill="#1f8a5b"/><path d="M50 4v14" stroke="#146642" stroke-width="5" stroke-linecap="round"/><ellipse cx="82" cy="40" rx="6" ry="9" fill="#1f6fb8" opacity=".8" transform="rotate(20 82 40)"/></svg>`
+};
+function artHtml(d){ return `<img src="img/${d.id}.jpg" alt="${esc(d.name)}" onerror="this.outerHTML=ART['${d.art}']">`; }
+
+/* ============ данные о препаратах ============ */
+const DRUGS = {
+  aknekutan: {
+    id:'aknekutan', art:'acne', name:'Акнекутан', inn:'изотретиноин', c:'#c8363b', cd:'#9a2226', cl:'#fde8e8',
+    short:'Капсулы 8 и 16 мг · тяжёлые формы акне',
+    desc:'Системный ретиноид для лечения тяжёлых форм акне (узелково-кистозных, конглобатных, с риском рубцов) и акне, не поддающегося другой терапии. Отпускается по рецепту, назначает и наблюдает врач-дерматолог.',
+    composition:[
+      ['Действующее вещество','изотретиноин 8 мг или 16 мг в одной капсуле'],
+      ['Вспомогательные вещества','Гелюцир® 50/13 (96 / 192 мг), очищенное соевое масло (52 / 104 мг), Спан® 80 (8 / 16 мг)'],
+      ['Капсула 8 мг','коричневая, твёрдая желатиновая, №3: желатин, краситель железа оксид красный (Е172), титана диоксид (Е171)'],
+      ['Капсула 16 мг','белый корпус, зелёная крышечка, №1: желатин, титана диоксид (Е171), железа оксид жёлтый (Е172), индигокармин (Е132)'],
+      ['Содержимое','воскообразная паста жёлто-оранжевого цвета'],
+      ['Упаковка','ПВХ/алюминиевые блистеры по 10 или 14 капсул']
+    ],
+    sections:[
+      ['Показания',`<ul class="clean"><li>Тяжёлые формы акне: узелково-кистозные, конглобатные, с риском образования рубцов.</li><li>Акне, не поддающееся другим видам терапии.</li></ul>`],
+      ['Как принимать',`<ul class="clean"><li>Внутрь, желательно во время еды, 1–2 раза в сутки.</li><li>Начальная доза: 0,4 мг/кг/сут; в отдельных случаях — до 0,8 мг/кг/сут.</li><li>Тяжёлые формы или акне туловища: до 2 мг/кг/сут — только по решению врача.</li><li>Оптимальная курсовая доза: 100–120 мг/кг. Полная ремиссия обычно через 16–24 недели.</li><li>При плохой переносимости можно принимать меньшую дозу, но дольше.</li><li>При рецидиве повторный курс — не ранее чем через 8 недель после первого.</li><li>При тяжёлой хронической почечной недостаточности начальная доза — 8 мг/сут.</li></ul>`],
+      ['Противопоказания',`<ul class="clean"><li><b>Беременность (в том числе планируемая)</b> и период грудного вскармливания.</li><li>Печёночная недостаточность, гипервитаминоз А, выраженная гиперлипидемия.</li><li>Одновременный приём тетрациклинов.</li><li>Повышенная чувствительность к компонентам (в составе соевое масло).</li><li>Возраст до 12 лет.</li></ul><p><b>С осторожностью:</b> сахарный диабет, депрессия в анамнезе, ожирение, нарушения липидного обмена, алкоголизм.</p>`],
+      ['Беременность и контрацепция',`<div class="warn"><b>Препарат вызывает тяжёлые пороки развития плода.</b></div><ul class="clean"><li>Женщинам детородного возраста — только при выполнении всех условий программы предотвращения беременности.</li><li>Не менее одного, лучше двух методов контрацепции: за 1 месяц до лечения, во время и 1 месяц после.</li><li>Тест на беременность: до начала, ежемесячно на лечении и через 5 недель после окончания.</li><li>Визит к врачу каждые 28 дней; рецепт женщине детородного возраста — на 30 дней.</li><li>Не сдавать кровь как донор во время лечения и 30 дней после.</li></ul>`],
+      ['Побочные действия',`<ul class="clean"><li><b>Частые:</b> сухость кожи, губ (хейлит), слизистых; носовые кровотечения; конъюнктивит и сухость глаз; шелушение ладоней и подошв; повышенная чувствительность к солнцу; боли в мышцах и суставах; утомляемость, головная боль; обострение акне в начале терапии.</li><li><b>Лабораторные:</b> повышение триглицеридов, холестерина, печёночных ферментов.</li><li><b>Редкие, но серьёзные:</b> депрессия, суицидальные мысли, псевдоопухоль мозга (сильная головная боль, тошнота, нарушение зрения), панкреатит, гепатит, тяжёлая кровавая диарея, снижение ночного зрения.</li></ul><div class="warn">При сильной головной боли с нарушением зрения, кровавой диарее, тяжёлой депрессии или мыслях о самоповреждении — немедленно обратитесь к врачу.</div>`],
+      ['Контроль и меры предосторожности',`<ul class="clean"><li>Печёночные ферменты и липиды натощак: до лечения, через 1 месяц, затем каждые 3 месяца.</li><li>Ограничить солнце и УФ, использовать SPF не ниже 15; увлажняющие средства для кожи и губ.</li><li>Не проводить глубокую химическую дермабразию и лазерные процедуры во время лечения и 5–6 месяцев после; восковая эпиляция — не ранее чем через 6 месяцев.</li><li>При непереносимости контактных линз — носить очки. Осторожно за рулём в тёмное время суток.</li></ul>`]
+    ],
+    source:'Инструкция по применению (РЛС, редакция 2018 г.)', srcUrl:'https://www.rlsnet.ru/drugs/aknekutan-36805',
+    actions:[['🧮 Калькулятор дозировки','#/calc','']]
+  },
+  aquamaris: {
+    id:'aquamaris', art:'aqua', name:'Аквамарис', inn:'морская вода Адриатического моря', c:'#1f6fb8', cd:'#154f87', cl:'#e3effa',
+    short:'Спрей и капли для носа · промывание',
+    desc:'Средство на основе воды Адриатического моря без консервантов. Увлажняет слизистую носа, помогает удалять корочки и слизь, применяется при насморке, сухости слизистой, для профилактики в сезон простуд. Выпускается в нескольких формах — подбирайте форму по возрасту.',
+    composition:[
+      ['Аквамарис капли для детей','вода Адриатического моря 30 %, вода очищенная 70 %; Na⁺ ≥2,5, Ca²⁺ ≥0,08, Mg²⁺ ≥0,35, Cl⁻ ≥5,5 мг/мл; без консервантов'],
+      ['Аквамарис Норм / Беби (спрей)','вода Адриатического моря и очищенная вода; NaCl не менее 9 г/л (изотонический); без консервантов и химических добавок'],
+      ['Аквамарис Стронг (спрей)','стерильный гипертонический раствор воды Адриатического моря (100 %); Na⁺ ≥7,5, Cl⁻ ≥16,5 мг/мл и др. ионы; без консервантов'],
+      ['Аквамарис Плюс (спрей)','вода Адриатического моря 25 %, декспантенол 1,33 %, вода очищенная; без консервантов']
+    ],
+    sections:[
+      ['Показания',`<ul class="clean"><li>Острые и хронические воспалительные заболевания носа, пазух и носоглотки; аденоидит.</li><li>Аллергические и вазомоторные риниты, послеоперационный период.</li><li>Профилактика инфекций носа в осенне-зимний период.</li><li>Сухость слизистой носа (кондиционеры, сухой воздух, курение).</li></ul>`],
+      ['Противопоказания и побочные эффекты',`<ul class="clean"><li>Противопоказание — повышенная чувствительность к компонентам.</li><li>Возможны аллергические реакции. У Стронг — дискомфорт в носу в начале применения; осторожно при частых носовых кровотечениях.</li><li>Новорождённым закапывать осторожно, с минимальным нажатием на флакон.</li><li>Беременность и лактация: возможно применение по показаниям.</li></ul>`]
+    ],
+    source:'Инструкции Аква Марис (Vidal, medi.ru, листок-вкладыш)', srcUrl:'https://www.vidal.ru/drugs/aqua_maris__2286',
+    actions:[['👶 Возраст, дозировка и как лечить насморк','#/aqua','blue']]
+  },
+  optinol: {
+    id:'optinol', art:'optinol', name:'Оптинол', inn:'гиалуронат натрия', c:'#1f8a5b', cd:'#146642', cl:'#e4f4ec',
+    short:'Увлажняющие глазные капли 0,21 % и 0,4 %',
+    desc:'Увлажняющие глазные капли с гиалуроновой кислотой без консервантов. Облегчают сухость, жжение и раздражение глаз (ветер, кондиционер, монитор, контактные линзы). Продаются без рецепта.',
+    composition:[
+      ['Действующее вещество','натрия гиалуронат (гиалуроновая кислота): 0,21 % или 0,40 %'],
+      ['Консерванты','не содержит; фильтр капельницы защищает содержимое от загрязнения 180 дней после вскрытия'],
+      ['Линейка','Оптинол Экспресс увлажнение, Глубокое увлажнение, Мягкое восстановление — состав уточняйте на упаковке выбранной формы']
+    ],
+    sections:[
+      ['Показания',`<ul class="clean"><li>Сухость роговицы и конъюнктивы (синдром сухого глаза).</li><li>Жжение, раздражение, дискомфорт от ветра, солнца, дыма, кондиционеров, работы за монитором, ношения контактных линз.</li></ul>`],
+      ['Как применять',`<ul class="clean"><li>По 1–2 капли в каждый глаз <b>3 раза в сутки</b>.</li><li>При необходимости можно закапывать чаще (консервантов нет); более 10 раз в сутки — только под наблюдением офтальмолога.</li><li>Длительность лечения определяет врач.</li><li><b>Контактные линзы:</b> совместим со всеми видами. Капли 0,21 % — линзы можно не снимать; 0,40 % — закапывать со снятыми линзами, надеть через 15 минут.</li><li>Только для индивидуального применения. Хранить при температуре не выше 25 °C.</li></ul>`],
+      ['Возраст',`<p>В найденной инструкции возрастные ограничения не указаны — <b>для детей уточняйте возраст в листке-вкладыше конкретной формы или у офтальмолога/педиатра</b>.</p>`],
+      ['Когда к врачу',`<p>Если сухость выраженная или не проходит, есть боль, покраснение, снижение зрения, выделения — обратитесь к офтальмологу.</p>`]
+    ],
+    source:'Оптинол (Compendium)', srcUrl:'https://compendium.com.ua/info/220006',
+    actions:[['⏰ Напоминалка: закапать капли','#/remind/optinol','']]
+  }
+};
+
+/* ============ маршрутизация ============ */
+const view = $('#view'), titleEl = $('#title'), backBtn = $('#back');
+backBtn.onclick = () => history.back();
+function route(){
+  const h = (location.hash || '#/').slice(2).split('/');
+  const r = h[0] || 'home';
+  $$('nav.bar a').forEach(a => a.classList.toggle('on', a.dataset.r === (['drug','aqua'].includes(r) ? 'home' : r)));
+  backBtn.style.display = ['drug','aqua'].includes(r) ? '' : 'none';
+  window.scrollTo(0,0);
+  const fn = {home, drug, calc, aqua, remind, pharmacy, ae}[r] || home;
+  fn(h[1]);
+}
+window.addEventListener('hashchange', route);
+
+/* ============ главная ============ */
+function home(){
+  titleEl.textContent = 'Справочник препаратов';
+  view.innerHTML = `<h2>Выберите препарат</h2>` + Object.values(DRUGS).map(d => `
+    <div class="card drug" style="--c:${d.c};--cd:${d.cd};--cl:${d.cl}" onclick="location.hash='#/drug/${d.id}'">
+      <div class="art">${artHtml(d)}</div>
+      <div><h3>${d.name}</h3><p>${d.short}</p></div>
+    </div>`).join('') + `
+    <div class="info">Нажмите на картинку или название препарата, чтобы увидеть состав, инструкцию и инструменты: калькулятор, подбор по возрасту, напоминалку.</div>
+    <div class="disc">Информация носит справочный характер и не заменяет консультацию врача и официальную инструкцию на упаковке.</div>`;
+}
+
+/* ============ страница препарата ============ */
+function drug(id){
+  const d = DRUGS[id] || DRUGS.aknekutan;
+  titleEl.textContent = d.name;
+  const st = `--c:${d.c};--cd:${d.cd};--cl:${d.cl}`;
+  view.innerHTML = `<div style="${st}">
+    <div class="hero"><div class="art">${artHtml(d)}</div><div><h2>${d.name}</h2><p>${esc(d.inn)}</p><p>${d.short}</p></div></div>
+    ${d.actions.map(a => `<a class="btn ${a[2]}" href="${a[1]}" style="--c:${a[2]==='blue'?'#1f6fb8':d.c}">${a[0]}</a>`).join('')}
+    <div class="card"><p style="margin:0">${d.desc}</p></div>
+    <details open><summary>🧪 Состав</summary><div class="in"><table>${d.composition.map(r=>`<tr><th style="width:36%">${r[0]}</th><td>${r[1]}</td></tr>`).join('')}</table></div></details>
+    <h3>📄 Инструкция</h3>
+    ${d.sections.map(s => `<details><summary>${s[0]}</summary><div class="in">${s[1]}</div></details>`).join('')}
+    <a class="btn alt" href="#/pharmacy" style="--c:${d.c};--cd:${d.cd}">📍 Где купить в Москве</a>
+    <a class="btn alt" href="#/ae" style="--c:${d.c};--cd:${d.cd}">⚠️ Сообщить о нежелательном явлении</a>
+    <p class="disc">Источник: <a href="${d.srcUrl}" target="_blank" rel="noopener">${d.source}</a>.<br>Перед применением сверяйтесь с актуальным листком-вкладышем из упаковки и с врачом.</p>
+  </div>`;
+}
+
+/* ============ калькулятор Акнекутана ============ */
+function calc(){
+  titleEl.textContent = 'Калькулятор: Акнекутан';
+  const s = store.get('calc', {w:'', h:'', age:'', sex:'f', k:'0.4', kc:'1', cap:'auto', n:'2', ckd:false});
+  view.innerHTML = `<div style="--c:#c8363b;--cd:#9a2226">
+    <div class="warn"><b>Только справочный расчёт.</b> Дозу назначает и корректирует врач. Расчёт по массе тела по схеме из инструкции; рост на дозу не влияет — он нужен только для индекса массы тела.</div>
+    <div class="card">
+      <div class="row"><div><label>Вес, кг</label><input id="w" type="number" inputmode="decimal" min="20" max="250" value="${esc(s.w)}"></div>
+      <div><label>Рост, см</label><input id="h" type="number" inputmode="decimal" min="100" max="230" value="${esc(s.h)}"></div></div>
+      <div class="row"><div><label>Возраст, лет</label><input id="age" type="number" inputmode="numeric" min="1" max="100" value="${esc(s.age)}"></div>
+      <div><label>Пол</label><select id="sex"><option value="f">Женский</option><option value="m">Мужской</option></select></div></div>
+      <label>Доза на кг массы тела</label>
+      <select id="k">
+        <option value="0.4">0,4 мг/кг/сут — начальная (обычно)</option>
+        <option value="0.8">0,8 мг/кг/сут — максимум начальной</option>
+        <option value="1.0">1,0 мг/кг/сут — по назначению врача</option>
+        <option value="2.0">2,0 мг/кг/сут — тяжёлые формы, только врач</option>
+        <option value="custom">Другая (ввести)…</option>
+      </select>
+      <input id="kc" type="number" step="0.05" min="0.1" max="2" inputmode="decimal" value="${esc(s.kc)}" style="display:none;margin-top:8px" placeholder="мг/кг">
+      <div class="row"><div><label>Какие капсулы</label><select id="cap"><option value="auto">8 мг и 16 мг вместе</option><option value="8">только 8 мг</option><option value="16">только 16 мг</option></select></div>
+      <div><label>Приёмов в сутки</label><select id="n"><option value="1">1 раз</option><option value="2">2 раза</option></select></div></div>
+      <label style="display:flex;gap:10px;align-items:center;font-weight:500"><input id="ckd" type="checkbox" style="width:auto"> Тяжёлая хроническая почечная недостаточность</label>
+    </div>
+    <div id="out"></div>
+    <div class="card"><b>Напомнить о приёме?</b><p style="margin:4px 0 0;color:var(--muted);font-size:14px">Принимать лучше во время еды.</p><a class="btn alt small" href="#/remind/aknekutan">⏰ Создать напоминание</a></div>
+  </div>`;
+  $('#sex').value = s.sex; $('#k').value = s.k; $('#cap').value = s.cap; $('#n').value = s.n; $('#ckd').checked = s.ckd;
+  const upd = () => {
+    const g = id => $('#'+id).value;
+    const st = {w:g('w'), h:g('h'), age:g('age'), sex:g('sex'), k:g('k'), kc:g('kc'), cap:g('cap'), n:g('n'), ckd:$('#ckd').checked};
+    store.set('calc', st);
+    $('#kc').style.display = st.k === 'custom' ? '' : 'none';
+    $('#out').innerHTML = calcResult(st);
+  };
+  $$('input,select', view).forEach(e => e.addEventListener('input', upd));
+  upd();
+}
+function calcResult(s){
+  const w = parseFloat(s.w), h = parseFloat(s.h), age = parseFloat(s.age);
+  if(!(w > 0)) return `<div class="info">Введите вес, чтобы получить расчёт.</div>`;
+  if(w < 20 || w > 250) return `<div class="warn">Проверьте вес: допустимо 20–250 кг.</div>`;
+  if(age > 0 && age < 12) return `<div class="warn"><b>Не применяется.</b> Препарат противопоказан детям до 12 лет.</div>`;
+  let k = s.k === 'custom' ? parseFloat(s.kc) : parseFloat(s.k);
+  if(!(k > 0)) return `<div class="info">Введите дозу на кг.</div>`;
+  if(k > 2) return `<div class="warn">Доза выше 2 мг/кг/сут не предусмотрена инструкцией.</div>`;
+  let target = w * k, note = '';
+  if(s.ckd){ target = 8; note = `<div class="info">При тяжёлой ХПН начальная доза по инструкции — 8 мг/сут; дальнейшее решение — за врачом.</div>`; }
+  let n8 = Math.max(1, Math.round(target / 8)), a16 = 0, a8 = 0, daily;
+  if(s.cap === '16'){ a16 = Math.max(1, Math.round(target / 16)); daily = a16 * 16; }
+  else if(s.cap === '8'){ a8 = n8; daily = n8 * 8; }
+  else { a16 = Math.floor(n8 / 2); a8 = n8 % 2; daily = n8 * 8; }
+  const caps = [a16 ? `<b>${a16}</b> × 16 мг` : '', a8 ? `<b>${a8}</b> × 8 мг` : ''].filter(Boolean).join(' + ');
+  const total = a16 + a8, perKg = daily / w, nn = +s.n;
+  const bmi = h > 100 ? w / ((h/100)**2) : null;
+  const cumLo = 100 * w, cumHi = 120 * w;
+  const wkLo = cumLo / daily / 7, wkHi = cumHi / daily / 7;
+  const list = [...Array(a16).fill(16), ...Array(a8).fill(8)];
+  const slots = Array.from({length:nn}, () => ({sum:0, c16:0, c8:0}));
+  list.forEach(c => { const t = slots.reduce((m,x)=> x.sum < m.sum ? x : m, slots[0]); t.sum += c; c===16 ? t.c16++ : t.c8++; });
+  const fmt = x => [x.c16?`${x.c16} × 16 мг`:'', x.c8?`${x.c8} × 8 мг`:''].filter(Boolean).join(' + ') || '—';
+  const plan = nn === 1 ? `1 приём во время еды: ${caps}` : `Утром: ${fmt(slots[0])} (${slots[0].sum} мг)<br>Вечером: ${fmt(slots[1])} (${slots[1].sum} мг)<br><span style="color:var(--muted);font-size:14px">Оба приёма — во время еды.</span>`;
+  let w1 = '';
+  if(perKg > 0.8 && !s.ckd) w1 = `<div class="warn">Фактическая доза ${perKg.toFixed(2)} мг/кг/сут выше обычной начальной (до 0,8). Применяется только по назначению врача.</div>`;
+  if(Math.abs(perKg - k) > 0.1 && !s.ckd) w1 += `<div class="info">Капсулы делить нельзя, поэтому доза округлена до целого числа капсул: фактически ${perKg.toFixed(2)} мг/кг.</div>`;
+  const bmiTxt = bmi ? `<p style="margin:6px 0 0;color:var(--muted);font-size:14px">ИМТ: ${bmi.toFixed(1)} ${bmi>=30?'— ожирение: препарат применяют с осторожностью, контролируйте липиды.':''}</p>` : '';
+  return `${note}<div class="card"><div style="color:var(--muted);font-size:14px">Суточная доза</div>
+    <div class="big">${daily} мг</div>
+    <div style="font-size:20px;margin-top:6px">${caps} <span style="color:var(--muted);font-size:14px">(${total} капс. в сутки)</span></div>
+    <p style="margin:8px 0 0">${plan}</p>${bmiTxt}</div>
+    ${w1}
+    <div class="card"><b>Ориентир на курс</b>
+      <p style="margin:6px 0">Оптимальная курсовая доза по инструкции: 100–120 мг/кг, то есть <b>${Math.round(cumLo)}–${Math.round(cumHi)} мг</b> на ваш вес.</p>
+      <p style="margin:0;color:var(--muted);font-size:14px">При такой суточной дозе это около ${wkLo.toFixed(0)}–${wkHi.toFixed(0)} недель; обычно ремиссия наступает за 16–24 недели. Длительность определяет врач.</p></div>
+    <div class="warn"><b>Беременность исключена обязательно.</b> Препарат вызывает тяжёлые пороки развития плода. Контрацепция за месяц до, во время и месяц после лечения; ежемесячный тест на беременность.</div>`;
+}
+
+/* ============ Аквамарис ============ */
+const AQ_FORMS = [
+  {n:'Капли для детей', from:0, type:'капли', t:'Лечение: 2 капли в каждый носовой ход 4 раза в сутки, курс 2–4 недели (повтор через месяц). Профилактика: 1–2 капли 2–3 раза в сутки.', note:'С первого дня жизни; новорождённым — осторожно, с минимальным нажатием на флакон.'},
+  {n:'Беби (спрей)', from:6, type:'спрей', t:'1–2 впрыскивания в каждый носовой ход 2–6 раз в сутки и чаще при необходимости.', note:'С 6 месяцев.'},
+  {n:'Норм (спрей)', from:6, type:'спрей', t:'1–2 впрыскивания в каждый носовой ход 2–6 раз в сутки и чаще при необходимости. Срок применения не ограничен.', note:'С 6 месяцев и взрослым. Изотонический — для ежедневного ухода.'},
+  {n:'Стронг (спрей, гипертонический)', from:12, type:'спрей', t:'1–2 впрыскивания в каждый носовой ход 3–4 раза в сутки в течение 2 недель.', note:'С 1 года и взрослым. Помогает при заложенности; осторожно при частых носовых кровотечениях.'},
+  {n:'Плюс (спрей, с декспантенолом)', from:12, type:'спрей', t:null, note:'С 1 года и взрослым. Дозы зависят от возраста (см. ниже).'}
+];
+const AQ_PLUS = [
+  {a:[12,84], l:'1–7 лет', th:'4 раза в день по 2 впрыскивания в каждый носовой ход', pr:'1–3 раза в день по 1–2 впрыскивания'},
+  {a:[84,192], l:'7–16 лет', th:'4–6 раз в день по 2 впрыскивания в каждый носовой ход', pr:'2–4 раза в день по 2 впрыскивания'},
+  {a:[192,9999], l:'с 16 лет и взрослые', th:'4–8 раз в день по 2–3 впрыскивания в каждый носовой ход', pr:'3–6 раз в день по 2–3 впрыскивания'}
+];
+function aqua(){
+  titleEl.textContent = 'Аквамарис: возраст и применение';
+  const st = store.get('aqage','24');
+  view.innerHTML = `<div style="--c:#1f6fb8;--cd:#154f87">
+    <div class="card"><label style="margin-top:0">Возраст пациента</label>
+    <select id="ag">
+      <option value="0">Новорождённый – до 6 месяцев</option><option value="6">6 месяцев – 1 год</option>
+      <option value="24">1–7 лет</option><option value="100">7–16 лет</option><option value="300">16 лет и старше</option>
+    </select></div>
+    <div id="forms"></div>
+    <h3>💧 Как промывать нос</h3>
+    <div class="card"><ol class="clean" style="padding-left:22px">
+      <li><b>Младенцы (Беби):</b> уложите ребёнка, голову поверните набок. Введите наконечник в верхний носовой ход, промойте несколько секунд. Повторите с другой стороны.</li>
+      <li><b>С 6 месяцев и взрослые (Норм):</b> наклоните голову набок, промойте верхний носовой ход несколько секунд, затем высморкайтесь. Повторите с другой стороны.</li>
+      <li>Для размягчения корочек у малышей закапайте и удалите излишки ватным жгутиком или платком.</li>
+    </ol></div>
+    <h3>🤧 Как справляться с насморком</h3>
+    <div class="card"><ul class="clean">
+      <li>Регулярно промывайте/увлажняйте нос: это очищает слизистую и облегчает дыхание, но не лечит причину (вирус, аллергию).</li>
+      <li>Увлажняйте воздух, проветривайте, давайте достаточно жидкости.</li>
+      <li>Перед сном и кормлением малышам — предварительно очистите нос.</li>
+    </ul>
+    <div class="warn">Обратитесь к врачу, если насморк длится более 7–10 дней, есть температура выше 38 °C у ребёнка, боль в ухе или пазухах, гнойные выделения, затруднённое дыхание. Младенцам до 3 месяцев — при любых симптомах простуды.</div></div>
+    <a class="btn alt" href="#/drug/aquamaris">📄 Состав и инструкция Аквамарис</a>
+  </div>`;
+  const draw = () => {
+    const m = +$('#ag').value; store.set('aqage', String($('#ag').value));
+    const months = m === 0 ? 0 : m;  // 0, 6, 24, 100, 300 → условные месяцы
+    $('#forms').innerHTML = AQ_FORMS.map(f => {
+      const ok = months >= f.from;
+      let body = f.t || '';
+      if(f.n.startsWith('Плюс') && ok){
+        const p = AQ_PLUS.find(x => months >= x.a[0] && months < x.a[1]) || AQ_PLUS[0];
+        body = `<b>${p.l}.</b> Лечение: ${p.th}. Профилактика: ${p.pr}. Курс 2–4 недели, повтор через месяц.`;
+      }
+      return `<div class="card" style="${ok?'':'opacity:.55'}"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><b>${f.n}</b><span class="pill ${ok?'g':'r'}">${ok?'подходит':'не по возрасту'}</span></div>
+        <p style="margin:6px 0 0;font-size:14px;color:var(--muted)">${f.note}</p>${ok?`<p style="margin:8px 0 0">${body}</p>`:''}</div>`;
+    }).join('');
+  };
+  $('#ag').value = st; $('#ag').onchange = draw; draw();
+}
+
+/* ============ напоминания ============ */
+let rems = store.get('rems', []);
+const DRUG_LBL = {optinol:'Оптинол — закапать капли в глаза', aknekutan:'Акнекутан — принять капсулы во время еды', aquamaris:'Аквамарис — промыть нос'};
+function saveRems(){ store.set('rems', rems); syncNative(); }
+async function syncNative(){
+  if(!LN) return;
+  try{
+    const pend = await LN.getPending();
+    if(pend.notifications.length) await LN.cancel({notifications: pend.notifications.map(n => ({id:n.id}))});
+    const list = rems.filter(r => r.on).map(r => ({
+      id: r.id, title: '⏰ Пора по расписанию', body: DRUG_LBL[r.drug] || r.label,
+      channelId: 'reminders', schedule: {on:{hour:+r.time.slice(0,2), minute:+r.time.slice(3,5)}, allowWhileIdle:true}
+    }));
+    if(list.length) await LN.schedule({notifications: list});
+  }catch(e){ console.warn(e); }
+}
+async function ensurePerm(){
+  try{
+    if(LN){
+      const p = await LN.requestPermissions();
+      try{ await LN.createChannel({id:'reminders', name:'Напоминания о лекарствах', importance:5, visibility:1, vibration:true}); }catch(e){}
+      return p.display === 'granted';
+    }
+    if('Notification' in window && Notification.permission === 'default') await Notification.requestPermission();
+  }catch(e){}
+  return true;
+}
+function remind(preset){
+  titleEl.textContent = 'Напоминания';
+  const dflt = DRUGS[preset] ? preset : 'optinol';
+  view.innerHTML = `<div style="--c:#1f6fb8;--cd:#154f87">
+    <div class="card">
+      <label style="margin-top:0">Препарат</label>
+      <select id="rd">${Object.values(DRUGS).map(d=>`<option value="${d.id}">${d.name}</option>`).join('')}</select>
+      <label>Время</label><input id="rt" type="time" value="09:00">
+      <button class="btn blue" id="radd">➕ Добавить напоминание</button>
+      <button class="btn alt small" id="rpre" style="--c:#1f8a5b;--cd:#146642">Оптинол: 3 раза в день (09:00 · 14:00 · 20:00)</button>
+    </div>
+    <h3>Мои напоминания</h3><div id="rl"></div>
+    <div class="info" id="rinfo"></div>
+  </div>`;
+  $('#rd').value = dflt;
+  $('#rinfo').textContent = isNative
+    ? 'Напоминания приходят как уведомления со звуком, даже когда приложение закрыто. Разрешите уведомления и «будильники и напоминания» в настройках телефона, если звук не срабатывает.'
+    : 'В браузере напоминание сработает, пока страница открыта. Для надёжных будильников установите приложение (APK) на телефон.';
+  const draw = () => {
+    $('#rl').innerHTML = rems.length ? [...rems].sort((a,b)=>a.time.localeCompare(b.time)).map(r => `
+      <div class="card rem"><div class="t">${r.time}</div><div class="d">${esc(DRUGS[r.drug]?.name||'')}<small>${esc(DRUG_LBL[r.drug]||'')}</small></div>
+      <button class="sw ${r.on?'on':''}" data-t="${r.id}" aria-label="Вкл/выкл"></button><button class="x" data-x="${r.id}" aria-label="Удалить">✕</button></div>`).join('')
+      : `<div class="card" style="color:var(--muted)">Пока нет напоминаний.</div>`;
+    $$('[data-t]').forEach(b => b.onclick = () => { const r = rems.find(x=>x.id==b.dataset.t); r.on = !r.on; saveRems(); draw(); });
+    $$('[data-x]').forEach(b => b.onclick = () => { rems = rems.filter(x=>x.id!=b.dataset.x); saveRems(); draw(); });
+  };
+  const add = async (drug, time) => {
+    if(rems.some(r => r.drug===drug && r.time===time)) return;
+    await ensurePerm();
+    rems.push({id: Math.floor(Date.now()/1000) % 2000000000 + rems.length, drug, time, on:true, label:DRUG_LBL[drug]});
+    saveRems(); draw();
+  };
+  $('#radd').onclick = async () => { await add($('#rd').value, $('#rt').value); toast('Напоминание добавлено'); };
+  $('#rpre').onclick = async () => { for(const t of ['09:00','14:00','20:00']) await add('optinol', t); toast('Добавлено 3 напоминания'); };
+  draw();
+}
+/* сигнал в самом приложении (на случай, если оно открыто) */
+let lastFired = '';
+function beep(){ try{ const a = new (window.AudioContext||window.webkitAudioContext)(); [0,.3,.6].forEach(t=>{ const o=a.createOscillator(), g=a.createGain(); o.frequency.value=880; o.connect(g); g.connect(a.destination); g.gain.setValueAtTime(.25,a.currentTime+t); o.start(a.currentTime+t); o.stop(a.currentTime+t+.2); }); }catch(e){} }
+function showAlarm(r){
+  beep(); if(navigator.vibrate) navigator.vibrate([300,150,300]);
+  const d = document.createElement('div'); d.className='alarm';
+  d.innerHTML = `<div class="box"><div class="e">⏰</div><h2>Пора по расписанию</h2><p>${esc(DRUG_LBL[r.drug]||r.label)}</p><button class="btn blue" id="aok">Готово</button></div>`;
+  document.body.appendChild(d); $('#aok', d).onclick = () => d.remove();
+  if(!isNative && 'Notification' in window && Notification.permission === 'granted') try{ new Notification('⏰ Пора по расписанию', {body: DRUG_LBL[r.drug]}); }catch(e){}
+}
+setInterval(() => {
+  const now = new Date(), hm = String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+  const key = now.toDateString() + hm;
+  if(key === lastFired) return;
+  const r = rems.find(x => x.on && x.time === hm);
+  if(r){ lastFired = key; showAlarm(r); }
+}, 15000);
+syncNative();
+
+/* ============ аптеки (Москва) ============ */
+function pharmacy(){
+  titleEl.textContent = 'Где купить в Москве';
+  const q = {aknekutan:'Акнекутан', aquamaris:'Аквамарис', optinol:'Оптинол'};
+  const e = encodeURIComponent;
+  const shops = [
+    ['Uteka (сравнение цен аптек Москвы)', n=>`https://uteka.ru/search/?query=${e(n)}`],
+    ['Аптека.ру', n=>`https://apteka.ru/search/?q=${e(n)}`],
+    ['Еаптека', n=>`https://www.eapteka.ru/search/?q=${e(n)}`],
+    ['ЗдравСити', n=>`https://zdravcity.ru/search/?what=${e(n)}`],
+    ['Яндекс.Карты: аптеки рядом', n=>`https://yandex.ru/maps/213/moscow/search/${e('аптека '+n)}/`]
+  ];
+  view.innerHTML = `<div class="info">Откройте поиск по нужному препарату: сайты покажут ближайшие аптеки Москвы, наличие и цены. Адреса и остатки меняются, поэтому приложение не хранит их внутри — так вы всегда видите актуальные данные.</div>` +
+    Object.entries(DRUGS).map(([id,d]) => `<div class="card" style="border-left:6px solid ${d.c}"><b style="color:${d.cd}">${d.name}</b>${id==='aknekutan'?'<span class="pill r" style="margin-left:8px">по рецепту</span>':''}
+      <div style="margin-top:8px">${shops.map(s=>`<a class="btn small" style="--c:${d.c}" target="_blank" rel="noopener" href="${s[1](q[id])}">${s[0]}</a>`).join('')}</div></div>`).join('') +
+    `<div class="disc">Акнекутан отпускается по рецепту врача; перед визитом в аптеку позвоните и уточните наличие.</div>`;
+}
+
+/* ============ нежелательные явления ============ */
+function ae(){
+  titleEl.textContent = 'Сообщить о нежелательном явлении';
+  const set = store.get('aeSet', {to:''}), hist = store.get('aeHist', []);
+  view.innerHTML = `<div style="--c:#c8363b;--cd:#9a2226">
+    <div class="warn"><b>Если состояние тяжёлое</b> (затруднённое дыхание, отёк лица, кровавая диарея, сильная головная боль с нарушением зрения, мысли о самоповреждении) — вызывайте скорую помощь (112 / 103) или немедленно обращайтесь к врачу. Форма не заменяет медицинскую помощь.</div>
+    <div class="card">
+      <label style="margin-top:0">Препарат</label>
+      <select id="ad">${Object.values(DRUGS).map(d=>`<option>${d.name}</option>`).join('')}</select>
+      <div class="row"><div><label>Возраст</label><input id="aa" type="number" inputmode="numeric"></div>
+      <div><label>Пол</label><select id="as"><option>Женский</option><option>Мужской</option></select></div></div>
+      <div class="row"><div><label>Вес, кг</label><input id="aw" type="number" inputmode="decimal"></div>
+      <div><label>Дата начала</label><input id="adt" type="date"></div></div>
+      <label>Суточная доза / схема приёма</label><input id="ado" placeholder="например, 16 мг 2 раза в день">
+      <label>Что произошло (описание реакции)</label><textarea id="adesc" placeholder="Опишите симптомы, когда начались, как протекают"></textarea>
+      <div class="row"><div><label>Тяжесть</label><select id="asev"><option>Лёгкая</option><option>Средняя</option><option>Тяжёлая</option></select></div>
+      <div><label>Исход</label><select id="aout"><option>Продолжается</option><option>Прошло</option><option>Госпитализация</option></select></div></div>
+      <label>Принятые меры (отмена препарата, лечение)</label><input id="aact">
+      <label>Другие лекарства</label><input id="aoth">
+      <label>Контакт для связи (необязательно)</label><input id="acon" placeholder="телефон или e-mail">
+      <label>Куда отправить (e-mail получателя)</label><input id="ato" type="email" value="${esc(set.to)}" placeholder="адрес фармаконадзора / врача">
+      <button class="btn red" id="asend">📤 Отправить сообщение</button>
+      <button class="btn alt small" id="acopy">Скопировать текст</button>
+    </div>
+    <a class="btn alt" target="_blank" rel="noopener" href="https://roszdravnadzor.gov.ru/">🏛 Официальное сообщение в Росздравнадзор (сайт)</a>
+    <h3>Отправленные ранее</h3><div id="ah"></div>
+    <div class="disc">Сообщение формируется на вашем телефоне и отправляется выбранным вами способом (почта или «Поделиться»). Сервера у приложения нет, данные никуда не передаются автоматически.</div>
+  </div>`;
+  const draw = () => $('#ah').innerHTML = hist.length ? hist.map(h => `<div class="card"><b>${esc(h.drug)}</b> <span class="pill b">${esc(h.date)}</span><p style="margin:6px 0 0;font-size:14px;color:var(--muted)">${esc(h.desc.slice(0,140))}</p></div>`).join('') : `<div class="card" style="color:var(--muted)">Пока пусто.</div>`;
+  const build = () => {
+    const g = id => $('#'+id).value.trim();
+    if(!g('adesc')) { toast('Опишите, что произошло'); return null; }
+    const txt = `Сообщение о нежелательном явлении\nПрепарат: ${g('ad')}\nДоза/схема: ${g('ado')||'—'}\nПациент: ${g('as')}, ${g('aa')||'?'} лет, ${g('aw')||'?'} кг\nНачало: ${g('adt')||'—'}\nОписание: ${g('adesc')}\nТяжесть: ${g('asev')}\nИсход: ${g('aout')}\nПринятые меры: ${g('aact')||'—'}\nДругие лекарства: ${g('aoth')||'—'}\nКонтакт: ${g('acon')||'—'}\nОтправлено из приложения: ${new Date().toLocaleString('ru-RU')}`;
+    return txt;
+  };
+  const remember = txt => { hist.unshift({drug:$('#ad').value, date:new Date().toLocaleDateString('ru-RU'), desc:$('#adesc').value, txt}); store.set('aeHist', hist.slice(0,30)); draw(); };
+  $('#acopy').onclick = async () => { const t = build(); if(!t) return; try{ await navigator.clipboard.writeText(t); toast('Скопировано'); }catch(e){ toast('Не удалось скопировать'); } };
+  $('#asend').onclick = async () => {
+    const t = build(); if(!t) return;
+    const to = $('#ato').value.trim(); store.set('aeSet', {to});
+    remember(t);
+    if(to){ location.href = `mailto:${to}?subject=${encodeURIComponent('Нежелательное явление: '+$('#ad').value)}&body=${encodeURIComponent(t)}`; }
+    else if(navigator.share){ try{ await navigator.share({title:'Нежелательное явление', text:t}); }catch(e){} }
+    else { try{ await navigator.clipboard.writeText(t); toast('Текст скопирован — вставьте в письмо'); }catch(e){} }
+  };
+  draw();
+}
+route();
+</script>
+</body>
+</html>
